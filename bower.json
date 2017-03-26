@@ -1,0 +1,20 @@
+{
+  "name": "engine7",
+  "authors": [
+    "jindong5210 <jindong05@126.com>"
+  ],
+  "description": "",
+  "main": "",
+  "keywords": [
+    "engine",
+    "template7"
+  ],
+  "license": ["MIT"],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
