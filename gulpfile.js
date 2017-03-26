@@ -28,8 +28,6 @@
                 ' * <%= pkg.homepage %>',
                 ' * ',
                 ' * Copyright <%= date.year %>, <%= pkg.author %>',
-                //' * The iDangero.us',
-                //' * http://www.idangero.us/',
                 ' * ',
                 ' * Licensed under <%= pkg.license.join(" & ") %>',
                 ' * ',

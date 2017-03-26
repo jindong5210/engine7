@@ -1,20 +1,25 @@
 {
   "name": "engine7",
-  "authors": [
-    "jindong5210 <jindong05@126.com>"
-  ],
+  "author": "Jeffrey King",,
+  "homepage": "http://www.engine7.com",
   "description": "",
   "main": "",
   "keywords": [
     "engine",
     "template7"
   ],
-  "license": ["MIT"],
+  "license": [
+    "MIT"
+  ],
   "ignore": [
     "**/.*",
     "node_modules",
     "bower_components",
     "test",
     "tests"
-  ]
+  ],
+  "dependencies": {
+    "jquery": "^2",
+    "Template7": "template7#^1.1.4"
+  }
 }

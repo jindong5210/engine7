@@ -1,3 +1,3 @@
-window.Template7 = (function () {
+window.Engine7 = (function () {
 	'use strict';
 })();
