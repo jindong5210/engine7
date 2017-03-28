@@ -9,6 +9,7 @@ JavaScript template engine based on Template7 with syntax similar to Handlebars.
 ## Getting Started
 
 * Required [jQuery](http://jquery.com/) and [Template7](http://www.idangero.us/template7/)
+
 * Installation
 ```
 <!DOCTYPE html>
@@ -22,6 +23,7 @@ JavaScript template engine based on Template7 with syntax similar to Handlebars.
 </body>
 </html>
 ```
+
 * Define templates
 ```
 <script type="text/template7" id="tmpl-skills">
