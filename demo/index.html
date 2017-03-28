@@ -10,8 +10,9 @@
 <body>
 <!-- Test -->
 <script type="text/template7" id="tmpl-test">
-<div>1</div>
-<div>2</div>
+<div>{{$context.$context.name}}</div>
+<div>{{$context.$context.age}}</div>
+<div>{{$context.$context.address}}</div>
 </script>
 
 <!-- Hobby -->
@@ -43,8 +44,8 @@
     <h3>Name : {{this.name}}</h3>
     <h3>Age : {{this.age}}</h3>
     <h3>Address : {{this.address}}</h3>
-    <div data-tpl-id="tmpl-hobby" data-api-url="data/skill.json?id={{this.id}}" data-api-param="{'age' : '{{this.age}}'}"></div>
-    <div data-tpl-id="tmpl-skills" data-api-url="data/hobby.json?id={{this.id}}" data-api-param="{'name' : '{{this.name}}'}"></div>
+    <div data-tpl-id="tmpl-hobby" data-api-url="data/hobby.json?id={{this.id}}" data-api-param="{'age' : '{{this.age}}'}"></div>
+    <div data-tpl-id="tmpl-skills" data-api-url="data/skill.json?id={{this.id}}" data-api-param="{'name' : '{{this.name}}'}"></div>
 </script>
 
 <!-- User All -->
@@ -72,8 +73,8 @@
 <div data-tpl-id="tmpl-user-all" data-api-url="data/test.json"></div>
 <hr>
 <div data-tpl-id="tmpl-hobby" data-api-url="data/hobby.json"></div>
-
-<!-- <div data-api-url="data/hobby.json"></div> -->
+<hr>
+<div data-api-url="data/hobby.json"></div>
 
 <script type="text/javascript" src="/src/engine7.js"></script>
 <script type="text/javascript">

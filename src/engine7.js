@@ -13,32 +13,7 @@ window.Engine7 = (function() {
             data: params,
             success : successCB,
             error : errorCB
-        })
-    }
-
-    function getFromTree(tmpls,id){
-        for (var key in tmpls) {
-            var tmpl = tmpls[key];
-            if(tmpl.id == id){
-                return tmpl;
-            }else{
-                return getFromTree(tmpl.children,id);
-            }
-        }
-    }
-
-    function getTreeList(tmpls){
-        var tree = {};
-        for (var key in tmpls) {
-            var tmpl = tmpls[key];
-            if(tmpl.parent != null){
-                var parent = tmpls[tmpl.parent];
-                parent.children.push(tmpl);
-            }else{
-                tree[key] = tmpl;
-            }
-        }
-        return tree;
+        });
     }
 
     function encodeJSON(json){
@@ -61,11 +36,11 @@ window.Engine7 = (function() {
 
         function Request(element){
             var req = this;
-            this.url;
-            this.params;
+            this.url = null;
+            this.params = null;
             this.method = "GET";
-            this.tpl;
-            this.dom;
+            this.tpl = null;
+            this.dom = null;
             this.context = {};
             this.invoke = function(){
 
@@ -98,15 +73,15 @@ window.Engine7 = (function() {
                         throw new Error("Error occurs when invoking request [" + url + "]");
 
                     }
-                )
-            }
+                );
+            };
             this.init = function(){
                 var tplId = $(element).attr(ATTR_TPL_ID);
                 var method = $(element).attr(ATTR_METHOD);
                 if(!isNull(tplId)){
                     req.tpl = engine.templates[tplId];
                     if(isNull(req.tpl)){
-                        throw new Error("Undefined template [" + tplId + "].")
+                        throw new Error("Undefined template [" + tplId + "].");
                     }
                     $(element).attr(ATTR_REF,tplId);
                 }
@@ -117,15 +92,15 @@ window.Engine7 = (function() {
                 req.params = $(element).attr(ATTR_PARAMS);
                 req.dom = $(element);
 
-            }
+            };
             this.init();
         }
 
         function Template(element){
             var tpl = this;
-            this.id;
-            this.src;
-            this.requests = [];
+            this.id = null;
+            this.src = null;
+            //this.requests = [];
             this.render = function (context, dom) {
                 var srcTemplate = Template7.compile(tpl.src);
                 var html = srcTemplate(context);
@@ -133,24 +108,20 @@ window.Engine7 = (function() {
                 var reqdoms = els.filter("[" + ATTR_URL + "]");
                 dom.append(els);
 
-                for(var i = 0; i < tpl.requests.length; i++){
-                    tpl.requests[i].context = context;
-                    tpl.requests[i].dom = $(reqdoms[i]);
-                    tpl.requests[i].invoke();
-                }
+                reqdoms.each(function () {
+                    var req = new Request(this);
+                    req.context = context;
+                    req.invoke();
+                });
 
-            }
+            };
             this.init = function(){
                 tpl.id = $(element).attr("id");
                 tpl.src = $(element).html();
                 if(isNull(tpl.id)){
                     throw new Error("ID is undefined in template.");
                 }
-                $(tpl.src).filter("[" + ATTR_URL + "]").each(function () {
-                    var req = new Request(this);
-                    tpl.requests.push(req);
-                })
-            }
+            };
             this.init();
         }
 
@@ -162,7 +133,7 @@ window.Engine7 = (function() {
                 var req = engine.requests[i];
                 req.invoke();
             }
-        }
+        };
 
         this._initTemplates = function(){
             var ATTR_TEMPLATE7 = "text/template7";
@@ -172,15 +143,15 @@ window.Engine7 = (function() {
                 engine.templates[template.id] = template;
             });
 
-        }
+        };
         this._initRequests = function(){
 
             $("[" + ATTR_URL + "]").each(function() {
                 var request = new Request(this);
                 engine.requests.push(request);
-            })
+            });
 
-        }
+        };
         this._initTemplates();
         this._initRequests();
         this.invokeAll();
