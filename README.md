@@ -4,10 +4,11 @@ Engine7
 JavaScript template engine based on Template7 with syntax similar to Handlebars. 
 * render a template with JSON API.
 * nested template supported.
-* Rich event supported.
+* Template7 extension.
 
 ## Getting Started
 
+* Required [jQuery](http://jquery.com/) and [Template7](http://www.idangero.us/template7/)
 * Installation
 ```
 <!DOCTYPE html>
@@ -78,23 +79,26 @@ JavaScript template engine based on Template7 with syntax similar to Handlebars.
 
 ### Attributes
 
-* [data-tpl-id]("#")
-* [data-tpl-ref]("#")
-* [data-api-url]("#")
-* [data-api-method]("#")
-* [data-api-param]("#")
-
-
-### Events
-
- * [onBeforeRender]("#")
- * [onAfterRender]("#")
- * [onBeforeSubmit]("#")
- * [onAfterSubmit]("#")
+* data-tpl-id
+* data-tpl-ref
+* data-api-url
+* data-api-method
+* data-api-param
 
 
 ### Methods
 
- * [ready]("#")
- * [invokeAll]("#")
+ * complete
+ * invokeAll
+ * onBeforeRender
+ * onAfterRender
+ * onBeforeInvoke
+ * onAfterInvoke
+ * onError
+ 
+ 
+### Variables
 
+* $context
+
+### Helpers

@@ -13,6 +13,8 @@
 <div>{{$context.$context.name}}</div>
 <div>{{$context.$context.age}}</div>
 <div>{{$context.$context.address}}</div>
+
+ <a href="#" id="test-link-{{$context.$context.id}}">Test Link</a>
 </script>
 
 <!-- Hobby -->
@@ -70,17 +72,33 @@
 
 <div data-tpl-id="tmpl-user" data-api-url="data/user.json"></div>
 <hr>
-<div data-tpl-id="tmpl-user-all" data-api-url="data/test.json"></div>
-<hr>
-<div data-tpl-id="tmpl-hobby" data-api-url="data/hobby.json"></div>
+<div id="api-user-all" data-tpl-id="tmpl-user-all" data-api-url="data/test.json"></div>
 <hr>
 <div data-api-url="data/hobby.json"></div>
 
 <script type="text/javascript" src="/src/engine7.js"></script>
 <script type="text/javascript">
-Engine7.ready(function(){
 
-})
+    Engine7.onBeforeRender("tmpl-skills",function (data, tpl) {
+        console.log("onBeforeRender")
+    })
+    Engine7.onAfterRender("tmpl-skills",function (el, tpl) {
+        console.log("onAfterRender")
+    })
+    Engine7.onBeforeInvoke("api-user-all",function (options, req) {
+        console.log("onBeforeInvoke")
+    })
+    Engine7.onAfterInvoke("api-user-all",function (data, status, req) {
+        console.log("onAfterInvoke")
+    })
+    Engine7.onError("api-user-all",function (xhr, status, error, req) {
+        console.log("onError")
+    })
+    Engine7.complete(function () {
+        $("#test-link-1").on("click",function () {
+            alert("clicked");
+        })
+    })
 </script>
 </body>
 </html>
