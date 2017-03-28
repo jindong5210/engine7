@@ -27,6 +27,8 @@ window.Engine7 = (function() {
     function Engine7(){
         var engine = this;
 
+        var ATTR_TEMPLATE7 = "text/template7";
+
         var ATTR_TPL_ID = "data-tpl-id";
         var ATTR_URL = "data-api-url";
         var ATTR_METHOD = "data-api-method";
@@ -71,7 +73,6 @@ window.Engine7 = (function() {
                     function (xhr, status, error) {
                         console.error(error);
                         throw new Error("Error occurs when invoking request [" + url + "]");
-
                     }
                 );
             };
@@ -100,7 +101,6 @@ window.Engine7 = (function() {
             var tpl = this;
             this.id = null;
             this.src = null;
-            //this.requests = [];
             this.render = function (context, dom) {
                 var srcTemplate = Template7.compile(tpl.src);
                 var html = srcTemplate(context);
@@ -135,14 +135,15 @@ window.Engine7 = (function() {
             }
         };
 
-        this._initTemplates = function(){
-            var ATTR_TEMPLATE7 = "text/template7";
+        this.ready = function(cb){
 
+        };
+
+        this._initTemplates = function(){
             $("script[type='" + ATTR_TEMPLATE7 + "']").each(function(i) {
                 var template = new Template(this);
                 engine.templates[template.id] = template;
             });
-
         };
         this._initRequests = function(){
 
