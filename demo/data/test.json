@@ -1,0 +1,32 @@
+{
+	
+	"id" : 1,
+	"name" : "Jeffrey",
+	"age" : 33,
+	"address" : "Dalian Software Park, China",
+	"mail" : "jindong05@126.com",
+	"skills" : [
+		{
+			"id" : 1,
+			"name" : "javascript"
+		},
+		{
+			"id" : 2,
+			"name" : "java"
+		},
+		{
+			"id" : 3,
+			"name" : "nodejs"
+		},
+		{
+			"id" : 4,
+			"name" : "html"
+		},
+		{
+			"id" : 5,
+			"name" : "css"
+		}
+	],
+	"hobby" : ["swimming","football"]
+
+}

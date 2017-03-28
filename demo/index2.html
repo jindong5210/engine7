@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Engine7</title>
+<script type="text/javascript"
+	src="/bower_components/jquery/dist/jquery.min.js"></script>
+<script type="text/javascript"
+	src="/bower_components/Template7/dist/template7.min.js"></script>
+
+</head>
+<body>
+<template type="text/template7" id="test">
+	<table>
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>Name</th>
+			</tr>
+		</thead>
+		<tbody>
+			{{#each this.skills}}
+			<tr>
+				<td>{{id}}</td>
+				<td>{{name}}</td>
+			</tr>
+			{{/each}}
+		</tbody>
+	</table>
+</template>
+	<script type="text/javascript">
+	var tmpl = Template7.compile($("#test").html());
+	console.log(tmpl({
+		name : "jind",
+		skills : [{id:"1",name:"a"},{id:"1",name:"b"}]
+	}))
+	</script>
+</body>
+</html>
