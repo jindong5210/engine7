@@ -83,7 +83,7 @@ JavaScript template engine based on Template7 with syntax similar to Handlebars.
 ### Attributes
 
 * #### data-tpl-id   
-    Define a template, always be used on a script tag.
+    Define a template. Always be used on a script tag.
    
     ```
     <script type="text/template7" id="tmpl-test">
@@ -102,6 +102,7 @@ JavaScript template engine based on Template7 with syntax similar to Handlebars.
 
 * #### data-api-method  
     Define a JSON API METHOD. (POST/GET)
+    
     ```
      <div data-tpl-id="tmpl-user-all" data-api-url="data/test.json" data-api-method="POST"></div>
      ```
@@ -114,29 +115,65 @@ JavaScript template engine based on Template7 with syntax similar to Handlebars.
     <div data-tpl-id="tmpl-user-all" data-api-url="data/test.json" data-api-param="{'id': '{{this.id}}'}"></div>
     ```
 
+* #### data-ajax-form
+    Define a AJAX form. Always be used on a form tag.    
+    The form will be submitted with AJAX.
+    The form elements will be converted to JSON.
+    
+    ```
+    <form id="form" data-ajax-form action="data/user.json">
+    <input name="name" type="text" value="1">
+    <input name="name" type="text" value="2">
+    <input name="user.test.ckbox" type="checkbox" value="a" checked>
+    <input name="user.test.ckbox" type="checkbox" value="b" checked>
+    </form>
+    ```
+    
+    The elements of form above will be converted to JSON below before form submitted. 
+    ```
+    {
+        "name" : ["1","2"],
+        "user" : {
+            test : {
+                ckbox : ["a","b"]
+            }
+        }
+    }
+    ```
 
 ### Methods
 
  * #### complete
-    Call after all API completed.
-    
- * #### invokeAll
-    Invoke all API, include sub API.
+    The startup method of Engine7.
+    ```
+    Engine7.complete(function(){
+    	...
+    });
+    ```
     
  * #### onBeforeRender
-    Call before render a template.
+    Before render a template.
     
  * #### onAfterRender
-    Call after render a template.
+    After render a template.
     
  * #### onBeforeInvoke
-    Call before invoke a API.
+    Before invoke a API.
     
  * #### onAfterInvoke
-    Call after invoke a API.
+    After invoke a API.
  
- * #### onError
-    Call on error occurs.
+ * #### onInvokeError
+    Invoke API error.
+    
+ * #### onBeforeSubmit
+    Before form submit.
+    
+ * #### onSubmitBack
+    After form submit.
+ 
+ * #### onSubmitError
+    Submit error.
  
 ### Variables
 
