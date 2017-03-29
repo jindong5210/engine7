@@ -37,6 +37,7 @@ window.Engine7 = (function() {
         this.templates = {};
         this.forms = {};
         this.tasks = 0;
+        this.completeCB = null;
         this.events = {
             beforeInvoke : {},
             afterInvoke : {},
@@ -270,7 +271,7 @@ window.Engine7 = (function() {
                 };
 
                 $.ajax(options).done(function(){
-
+                    $(element).find("input[type='submit']").removeAttr("disabled");
                 });;
             };
             this.init = function () {
@@ -299,6 +300,7 @@ window.Engine7 = (function() {
                     }
                 })
                 $(element).submit(function () {
+                    $(element).find("input[type='submit']").attr("disabled","disabled");
                     form.submit();
                     return false;
                 })
@@ -306,26 +308,25 @@ window.Engine7 = (function() {
             this.init();
         }
 
-        this.invokeAll = function(){
+        this._invokeAll = function(){
             for(var i = 0;i < engine.requests.length; i++){
                 var req = engine.requests[i];
                 req.invoke();
             }
+            if(engine.requests.length === 0){
+                engine.completeCB();
+            }
         };
 
         this.complete = function(cb){
-            engine.invokeAll();
             engine.completeCB = function () {
                 engine._initForms();
                 if(cb){
                     cb();
                 }
             };
+            engine._invokeAll();
         };
-
-        this.completeCB = function () {
-            engine._initForms();
-        }
 
         this.onBeforeRender = function(tplId, cb){
             engine.events.beforeRender[tplId] = cb;
@@ -369,10 +370,6 @@ window.Engine7 = (function() {
                 var request = new Request(this);
                 engine.requests.push(request);
             });
-
-            if(engine.requests.length == 0){
-                engine.completeCB();
-            }
         };
 
         this._initForms = function () {
