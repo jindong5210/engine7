@@ -1,10 +1,18 @@
 Engine7
 =========
 
+基于Template7构建，语法类似Handlebars的JavaScript模版引擎. 
+* 用JSON API来渲然模板.
+* 模版支持嵌套.
+* 封装AJAX表单提交.
+* 表单的数据可转换为可嵌套JSON格式.
+* 对Template7进行了扩展.
+
 JavaScript template engine based on Template7 with syntax similar to Handlebars. 
 * Render a template with JSON API.
 * Nested template supported.
 * AJAX form submit supported.
+* Form data could convert to nested JSON.
 * Template7 helper extension.
 
 ## Getting Started
@@ -75,6 +83,11 @@ JavaScript template engine based on Template7 with syntax similar to Handlebars.
 
 ```
 <div data-tpl-id="tmpl-user" data-api-url="data/user.json"></div>
+<script type="text/javascript">
+Engine7.complete(function(){
+	...
+});
+</script>
 ```
 
 
