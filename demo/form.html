@@ -55,7 +55,7 @@
 
 </table>
 
-    <input type="submit">
+    <input type="submit" id="submit">
 
 </form>
 
@@ -73,8 +73,8 @@ Engine7.onSubmitError("form",function (xhr, status, error, form) {
     console.log("onSubmitError")
 })
 Engine7.complete(function(){
-	$("#loading").on("click",function(){
-		alert(123)
+	$("#submit").on("click",function(){
+		console.log("submit button was clicked.")
 	})
 });
 </script>
