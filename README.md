@@ -4,7 +4,8 @@ Engine7
 JavaScript template engine based on Template7 with syntax similar to Handlebars. 
 * Render a template with JSON API.
 * Nested template supported.
-* Template7 extension.
+* AJAX form submit supported.
+* Template7 helper extension.
 
 ## Getting Started
 

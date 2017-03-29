@@ -5,13 +5,21 @@ window.Engine7 = (function() {
         return str === null || str === "" || str === undefined;
     }
 
+    function getArrayIndex(arr,e) {
+        for(var i=0; i<arr.length; i++){
+            if(arr[i] == e){
+                return i;
+            }
+        }
+        return -1;
+    }
+
     function encodeJSON(json){
         for (var key in json) {
             json[key] = encodeURIComponent(json[key]);
         }
         return json;
     }
-
 
     function Engine7(){
         var engine = this;
@@ -23,17 +31,21 @@ window.Engine7 = (function() {
         var ATTR_METHOD = "data-api-method";
         var ATTR_PARAMS = "data-api-param";
         var ATTR_REF = "data-tpl-ref";
+        var ATTR_AJAX_FORM = "data-ajax-form";
 
         this.requests = [];
         this.templates = {};
+        this.forms = {};
         this.tasks = 0;
-        this.complete = null;
         this.events = {
             beforeInvoke : {},
             afterInvoke : {},
             beforeRender : {},
             afterRender : {},
-            error : {}
+            invokeError : {},
+            beforeSubmit : {},
+            submitBack : {},
+            submitError : {},
         };
 
         function Request(element){
@@ -58,8 +70,8 @@ window.Engine7 = (function() {
                 }
             };
             this.handleError = function (xhr, status, error) {
-                if(!isNull(req.id) && !isNull(engine.events.error[req.id])){
-                    var errorEventCB = engine.events.error[req.id];
+                if(!isNull(req.id) && !isNull(engine.events.invokeError[req.id])){
+                    var errorEventCB = engine.events.invokeError[req.id];
                     if(!isNull(errorEventCB)){
                         errorEventCB(xhr, status, error, req);
                     }
@@ -164,7 +176,7 @@ window.Engine7 = (function() {
                 });
 
                 if(engine.tasks === 1 && reqdoms.length === 0){
-                    engine.complete();
+                    engine.completeCB();
                 }
 
             };
@@ -172,8 +184,124 @@ window.Engine7 = (function() {
                 tpl.id = $(element).attr("id");
                 tpl.src = $(element).html();
                 if(isNull(tpl.id)){
-                    throw new Error("ID is undefined in template.");
+                    throw new Error("ID is required on template.");
                 }
+            };
+            this.init();
+        }
+        
+        function Form(element) {
+            var form = this;
+
+            var INPUT_TYPE = ["text","hidden","password","checkbox","radio"]
+
+            this.id = null;
+            this.action = null;
+            this.method = "GET";
+            this.elements = [];
+
+            this.putElJSON = function (json, name, value) {
+                var arr = name.split(/\./);
+                var obj = {};
+                while(arr.length > 1){
+                    var node = arr.shift();
+                    if(!json[node]){
+                        json[node] = {};
+                    }
+                    json = json[node];
+                }
+                var last = arr[arr.length - 1];
+                if(json[last]){
+                    var tmp = [json[last]];
+                    tmp.push(value);
+                    json[last] = tmp;
+                }else{
+                    json[last] = value;
+                }
+            };
+
+            this.toJSON = function () {
+                var json = {};
+                    for(var i=0; i<form.elements.length; i++){
+                    var el = form.elements[i];
+                    var tag = el.tagName;
+                    var type = $(el).attr("type");
+                    var name = $(el).attr("name");
+                    var val = $(el).val();
+                    if(tag === "INPUT" && (type === "checkbox" || type === "radio")){
+                        if(!$(el).is(':checked')) {
+                            continue;
+                        }
+                    }
+                    form.putElJSON(json, name, val);
+                }
+                return json;
+            };
+            this.handleSuccess = function(data, status){
+                var submitBackEventCB = engine.events.submitBack[form.id];
+                if(!isNull(submitBackEventCB)){
+                    submitBackEventCB(data, status, form);
+                }
+            };
+            this.handleError = function (xhr, status, error) {
+                var submitErrorEventCB = engine.events.submitError[form.id];
+                if(!isNull(submitErrorEventCB)){
+                    submitErrorEventCB(xhr, status, error, form);
+                }else{
+                    console.error(error);
+                    throw new Error("Error occurs when submit form [" + form.id + "]");
+                }
+
+            };
+            this.submit = function () {
+                var json = form.toJSON();
+                var beforeSubmitEventCB = engine.events.beforeSubmit[form.id];
+                if(!isNull(beforeSubmitEventCB)){
+                    beforeSubmitEventCB(json, form);
+                }
+
+                var options = {
+                    url : form.action,
+                    type : form.method,
+                    dataType: "json",
+                    data : json,
+                    success : form.handleSuccess,
+                    error : form.handleError
+                };
+
+                $.ajax(options).done(function(){
+
+                });;
+            };
+            this.init = function () {
+                form.id = $(element).attr("id");
+                form.action = $(element).attr("action");
+
+                if(isNull(form.id)){
+                    throw new Error("ID is required on data-ajax-form.");
+                }
+                if(isNull(form.action)){
+                    throw new Error("Action is required on data-ajax-form.");
+                }
+                var method = $(element).attr("method");
+                if(!isNull(method)){
+                    form.method = method;
+                }
+                $(element).find("input,textarea,select").each(function () {
+                    var name = $(this).attr("name");
+                    var type = $(this).attr("type");
+                    var tag = this.tagName;
+                    if(!isNull(name)){
+                        if(tag === "INPUT" && getArrayIndex(INPUT_TYPE, type) < 0){//Not supported
+                            return true;
+                        }
+                        form.elements.push(this);
+                    }
+                })
+                $(element).submit(function () {
+                    form.submit();
+                    return false;
+                })
             };
             this.init();
         }
@@ -187,8 +315,17 @@ window.Engine7 = (function() {
 
         this.complete = function(cb){
             engine.invokeAll();
-            engine.complete = cb;
+            engine.completeCB = function () {
+                engine._initForms();
+                if(cb){
+                    cb();
+                }
+            };
         };
+
+        this.completeCB = function () {
+            engine._initForms();
+        }
 
         this.onBeforeRender = function(tplId, cb){
             engine.events.beforeRender[tplId] = cb;
@@ -206,12 +343,23 @@ window.Engine7 = (function() {
             engine.events.afterInvoke[reqId] = cb;
         };
 
-        this.onError = function(reqId, cb){
-            engine.events.error[reqId] = cb;
+        this.onInvokeError = function(reqId, cb){
+            engine.events.invokeError[reqId] = cb;
         };
 
-        this._init = function(){
+        this.onBeforeSubmit = function (formId, cb) {
+            engine.events.beforeSubmit[formId] = cb;
+        }
 
+        this.onSubmitBack = function (formId, cb) {
+            engine.events.submitBack[formId] = cb;
+        }
+
+        this.onSubmitError = function (formId, cb) {
+            engine.events.submitError[formId] = cb;
+        }
+
+        this._init = function(){
             $("script[type='" + ATTR_TEMPLATE7 + "']").each(function(i) {
                 var template = new Template(this);
                 engine.templates[template.id] = template;
@@ -221,7 +369,18 @@ window.Engine7 = (function() {
                 var request = new Request(this);
                 engine.requests.push(request);
             });
+
+            if(engine.requests.length == 0){
+                engine.completeCB();
+            }
         };
+
+        this._initForms = function () {
+            $("[" + ATTR_AJAX_FORM + "]").each(function() {
+                var form = new Form(this);
+                engine.forms[form.id] = form;
+            });
+        }
 
         this._init();
 

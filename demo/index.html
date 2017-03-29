@@ -91,7 +91,7 @@
     Engine7.onAfterInvoke("api-user-all",function (data, status, req) {
         console.log("onAfterInvoke")
     })
-    Engine7.onError("api-user-all",function (xhr, status, error, req) {
+    Engine7.onInvokeError("api-user-all",function (xhr, status, error, req) {
         console.log("onError")
     })
     Engine7.complete(function () {

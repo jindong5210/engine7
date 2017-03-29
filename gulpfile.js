@@ -17,7 +17,7 @@
             demo: 'demo/',
             source: 'src/',
         },
-        t7 = {
+        e7 = {
             filename: 'engine7',
             pkg: require('./bower.json'),
             banner: [
@@ -46,7 +46,7 @@
     gulp.task('build', function (cb) {
         gulp.src(paths.source + 'engine7.js')
             .pipe(sourcemaps.init())
-            .pipe(header(t7.banner, { pkg : t7.pkg, date: t7.date } ))
+            .pipe(header(e7.banner, { pkg : e7.pkg, date: e7.date } ))
             .pipe(jshint())
             .pipe(jshint.reporter(stylish))
             .pipe(sourcemaps.write('./'))
@@ -60,9 +60,9 @@
             .pipe(gulp.dest(paths.dist))
             .pipe(sourcemaps.init())
             .pipe(uglify())
-            .pipe(header(t7.banner, { pkg : t7.pkg, date: t7.date }))
+            .pipe(header(e7.banner, { pkg : e7.pkg, date: e7.date }))
             .pipe(rename(function(path) {
-                path.basename = t7.filename + '.min';
+                path.basename = e7.filename + '.min';
             }))
             .pipe(sourcemaps.write('./'))
             .pipe(gulp.dest(paths.dist));
