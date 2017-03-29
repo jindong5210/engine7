@@ -194,7 +194,7 @@ window.Engine7 = (function() {
         function Form(element) {
             var form = this;
 
-            var INPUT_TYPE = ["text","hidden","password","checkbox","radio"]
+            var INPUT_TYPE = ["text","hidden","password","checkbox","radio"];
 
             this.id = null;
             this.action = null;
@@ -272,7 +272,7 @@ window.Engine7 = (function() {
 
                 $.ajax(options).done(function(){
                     $(element).find("input[type='submit']").removeAttr("disabled");
-                });;
+                });
             };
             this.init = function () {
                 form.id = $(element).attr("id");
@@ -298,12 +298,12 @@ window.Engine7 = (function() {
                         }
                         form.elements.push(this);
                     }
-                })
+                });
                 $(element).submit(function () {
                     $(element).find("input[type='submit']").attr("disabled","disabled");
                     form.submit();
                     return false;
-                })
+                });
             };
             this.init();
         }
@@ -350,15 +350,15 @@ window.Engine7 = (function() {
 
         this.onBeforeSubmit = function (formId, cb) {
             engine.events.beforeSubmit[formId] = cb;
-        }
+        };
 
         this.onSubmitBack = function (formId, cb) {
             engine.events.submitBack[formId] = cb;
-        }
+        };
 
         this.onSubmitError = function (formId, cb) {
             engine.events.submitError[formId] = cb;
-        }
+        };
 
         this._init = function(){
             $("script[type='" + ATTR_TEMPLATE7 + "']").each(function(i) {
@@ -377,7 +377,7 @@ window.Engine7 = (function() {
                 var form = new Form(this);
                 engine.forms[form.id] = form;
             });
-        }
+        };
 
         this._init();
 
