@@ -21,6 +21,17 @@ window.Engine7 = (function() {
         return json;
     }
 
+    function randomString(len) {
+      len = len || 8;
+      var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      var maxPos = chars.length;
+      var pwd = '';
+      for (i = 0; i < len; i++) {
+        pwd += chars.charAt(Math.floor(Math.random() * maxPos));
+      }
+      return pwd;
+    }
+
     function Engine7(){
         var engine = this;
 
@@ -33,24 +44,15 @@ window.Engine7 = (function() {
         var ATTR_REF = "data-tpl-ref";
         var ATTR_AJAX_FORM = "data-ajax-form";
 
-        this.requests = [];
+        this.requests = {};
         this.templates = {};
         this.forms = {};
         this.tasks = 0;
         this.completeCB = null;
-        this.events = {
-            beforeInvoke : {},
-            afterInvoke : {},
-            beforeRender : {},
-            afterRender : {},
-            invokeError : {},
-            beforeSubmit : {},
-            submitBack : {},
-            submitError : {},
-        };
 
         function Request(element){
             var req = this;
+
             this.id = null;
             this.url = null;
             this.params = null;
@@ -58,12 +60,13 @@ window.Engine7 = (function() {
             this.tpl = null;
             this.dom = null;
             this.context = {};
+            this.onBeforeInvoke = null;
+            this.onAfterInvoke = null;
+            this.onInvokeError = null;
+
             this.handleSuccess = function(data, status){
-                if(!isNull(req.id)){
-                    var afterInvokeEventCB = engine.events.afterInvoke[req.id];
-                    if(!isNull(afterInvokeEventCB)){
-                        afterInvokeEventCB(data, status, req);
-                    }
+                if(!isNull(req.onAfterInvoke)){
+                    req.onAfterInvoke(data, status, req);
                 }
                 data.$context = req.context;
                 if(!isNull(req.tpl)){
@@ -71,11 +74,8 @@ window.Engine7 = (function() {
                 }
             };
             this.handleError = function (xhr, status, error) {
-                if(!isNull(req.id) && !isNull(engine.events.invokeError[req.id])){
-                    var errorEventCB = engine.events.invokeError[req.id];
-                    if(!isNull(errorEventCB)){
-                        errorEventCB(xhr, status, error, req);
-                    }
+                if(!isNull(req.onInvokeError)){
+                    req.onInvokeError(xhr, status, error, req);
                 }else{
                     console.error(error);
                     throw new Error("Error occurs when invoking request [" + req.url + "]");
@@ -94,7 +94,7 @@ window.Engine7 = (function() {
                         params = eval("(" + params + ")");
                     } catch (e) {
                         console.error(e);
-                        throw new Error("Can not parse params to JSON. ["+ req.id + "].");
+                        throw new Error("Can not parse params to JSON. ["+ req.url + "].");
                     }
                     if(req.method == "GET"){
                         params = encodeJSON(params);
@@ -108,11 +108,9 @@ window.Engine7 = (function() {
                     success : req.handleSuccess,
                     error : req.handleError
                 };
-                if(!isNull(req.id)){
-                    var beforeInvokeEventCB = engine.events.beforeInvoke[req.id];
-                    if(!isNull(beforeInvokeEventCB)){
-                        beforeInvokeEventCB(options, req);
-                    }
+
+                if(!isNull(req.onBeforeInvoke)){
+                  req.onBeforeInvoke(options, req);
                 }
 
                 $.ajax(options).done(function(){
@@ -134,8 +132,8 @@ window.Engine7 = (function() {
                 if(!isNull(method)){
                     req.method = method;
                 }
-                if(!isNull(id)){
-                    req.id = id;
+                if(isNull(id)){
+                    req.id = "req-" + randomString();
                 }
                 req.url = $(element).attr(ATTR_URL);
                 req.params = $(element).attr(ATTR_PARAMS);
@@ -147,26 +145,26 @@ window.Engine7 = (function() {
 
         function Template(element){
             var tpl = this;
+
             this.id = null;
             this.src = null;
-
+            this.onBeforeRender = null;
+            this.onAfterRender = null
 
             this.render = function (context, dom) {
 
                 var srcTemplate = Template7.compile(tpl.src);
 
-                var beforeRenderEventCB = engine.events.beforeRender[tpl.id];
-                if(!isNull(beforeRenderEventCB)){
-                    beforeRenderEventCB(context,tpl);
+                if(!isNull(tpl.onBeforeRender)){
+                  tpl.onBeforeRender(context,tpl);
                 }
 
                 var html = srcTemplate(context);
                 var els = $(html);
                 dom.append(els);
 
-                var afterRenderEventCB = engine.events.afterRender[tpl.id];
-                if(!isNull(afterRenderEventCB)){
-                    afterRenderEventCB(els,tpl);
+                if(!isNull(tpl.onAfterRender)){
+                  tpl.onAfterRender(els,tpl);
                 }
 
                 var reqdoms = els.filter("[" + ATTR_URL + "]");
@@ -174,6 +172,7 @@ window.Engine7 = (function() {
                     var req = new Request(this);
                     req.context = context;
                     req.invoke();
+                    engine.requests[req.id] = req;
                 });
 
                 if(engine.tasks === 1 && reqdoms.length === 0){
@@ -190,16 +189,18 @@ window.Engine7 = (function() {
             };
             this.init();
         }
-        
+
         function Form(element) {
             var form = this;
-
             var INPUT_TYPE = ["text","hidden","password","checkbox","radio"];
 
             this.id = null;
             this.action = null;
             this.method = "GET";
             this.elements = [];
+            this.onBeforeSubmit = null;
+            this.onSubmitBack = null;
+            this.onSubmitError = null
 
             this.putElJSON = function (json, name, value) {
                 var arr = name.split(/\./);
@@ -239,15 +240,13 @@ window.Engine7 = (function() {
                 return json;
             };
             this.handleSuccess = function(data, status){
-                var submitBackEventCB = engine.events.submitBack[form.id];
-                if(!isNull(submitBackEventCB)){
-                    submitBackEventCB(data, status, form);
+                if(!isNull(form.onSubmitBack)){
+                  form.onSubmitBack(data, status, form);
                 }
             };
             this.handleError = function (xhr, status, error) {
-                var submitErrorEventCB = engine.events.submitError[form.id];
-                if(!isNull(submitErrorEventCB)){
-                    submitErrorEventCB(xhr, status, error, form);
+                if(!isNull(form.onSubmitError)){
+                  form.onSubmitError(xhr, status, error, form);
                 }else{
                     console.error(error);
                     throw new Error("Error occurs when submit form [" + form.id + "]");
@@ -256,9 +255,8 @@ window.Engine7 = (function() {
             };
             this.submit = function () {
                 var json = form.toJSON();
-                var beforeSubmitEventCB = engine.events.beforeSubmit[form.id];
-                if(!isNull(beforeSubmitEventCB)){
-                    beforeSubmitEventCB(json, form);
+                if(!isNull(form.onBeforeSubmit)){
+                  form.onBeforeSubmit(json, form);
                 }
 
                 var options = {
@@ -279,7 +277,7 @@ window.Engine7 = (function() {
                 form.action = $(element).attr("action");
 
                 if(isNull(form.id)){
-                    throw new Error("ID is required on data-ajax-form.");
+                    form.id = "form-" + randomString();
                 }
                 if(isNull(form.action)){
                     throw new Error("Action is required on data-ajax-form.");
@@ -309,16 +307,19 @@ window.Engine7 = (function() {
         }
 
         this._invokeAll = function(){
-            for(var i = 0;i < engine.requests.length; i++){
-                var req = engine.requests[i];
-                req.invoke();
+            var count = 0;
+            for(var key in engine.requests){
+              var req = engine.requests[key];
+              req.invoke();
+              count ++;
             }
-            if(engine.requests.length === 0){
+            if(count === 0){
                 engine.completeCB();
             }
         };
 
         this.complete = function(cb){
+            engine._init();
             engine.completeCB = function () {
                 engine._initForms();
                 if(cb){
@@ -326,38 +327,6 @@ window.Engine7 = (function() {
                 }
             };
             engine._invokeAll();
-        };
-
-        this.onBeforeRender = function(tplId, cb){
-            engine.events.beforeRender[tplId] = cb;
-        };
-
-        this.onAfterRender = function(tplId, cb){
-            engine.events.afterRender[tplId] = cb;
-        };
-
-        this.onBeforeInvoke = function(reqId, cb){
-            engine.events.beforeInvoke[reqId] = cb;
-        };
-
-        this.onAfterInvoke = function(reqId, cb){
-            engine.events.afterInvoke[reqId] = cb;
-        };
-
-        this.onInvokeError = function(reqId, cb){
-            engine.events.invokeError[reqId] = cb;
-        };
-
-        this.onBeforeSubmit = function (formId, cb) {
-            engine.events.beforeSubmit[formId] = cb;
-        };
-
-        this.onSubmitBack = function (formId, cb) {
-            engine.events.submitBack[formId] = cb;
-        };
-
-        this.onSubmitError = function (formId, cb) {
-            engine.events.submitError[formId] = cb;
         };
 
         this._init = function(){
@@ -368,7 +337,7 @@ window.Engine7 = (function() {
 
             $("[" + ATTR_URL + "]").each(function() {
                 var request = new Request(this);
-                engine.requests.push(request);
+                engine.requests[request.id] = request;
             });
         };
 
@@ -379,7 +348,7 @@ window.Engine7 = (function() {
             });
         };
 
-        this._init();
+
 
     }
 
