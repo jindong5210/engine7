@@ -26,7 +26,7 @@ window.Engine7 = (function() {
       var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
       var maxPos = chars.length;
       var pwd = '';
-      for (i = 0; i < len; i++) {
+      for (var i = 0; i < len; i++) {
         pwd += chars.charAt(Math.floor(Math.random() * maxPos));
       }
       return pwd;
@@ -208,10 +208,10 @@ window.Engine7 = (function() {
                 }
 
                 if(engine.events.beforeRender["*"] || engine.events.beforeRender[tpl.id]){
-                    req.onBeforeRender = engine.events.beforeRender;
+                    tpl.onBeforeRender = engine.events.beforeRender;
                 }
                 if(engine.events.afterRender["*"] || engine.events.afterRender[tpl.id]){
-                    req.onAfterRender = engine.events.afterRender;
+                    tpl.onAfterRender = engine.events.afterRender;
                 }
             };
             this.init();
@@ -330,13 +330,13 @@ window.Engine7 = (function() {
                 });
 
                 if(engine.events.beforeSubmit["*"] || engine.events.beforeSubmit[form.id]){
-                    req.onBeforeSubmit = engine.events.beforeSubmit;
+                    form.onBeforeSubmit = engine.events.beforeSubmit;
                 }
                 if(engine.events.submitBack["*"] || engine.events.submitBack[form.id]){
-                    req.onSubmitBack = engine.events.submitBack;
+                    form.onSubmitBack = engine.events.submitBack;
                 }
                 if(engine.events.submitError["*"] || engine.events.submitError[form.id]){
-                    req.onSubmitError = engine.events.submitError;
+                    form.onSubmitError = engine.events.submitError;
                 }
             };
             this.init();
