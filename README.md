@@ -78,8 +78,8 @@ JavaScript template engine based on Template7 with syntax similar to Handlebars.
 	}
 ]
 ```
-* Render in html
 
+* Render in html
 ```
 <div data-tpl-id="tmpl-user" data-api-url="data/user.json"></div>
 <script type="text/javascript">
@@ -155,18 +155,18 @@ Engine7.complete(function(){
     
 ### Properties
 
- * ### templates
+ * #### templates
     All instance of Engine7 template.
     
- * ### requests
+ * #### requests
     All instance of Engine7 request.
     
- * ### forms
+ * #### forms
     All instance of Engine7 form.
 
 ### Methods
 
- * #### complete (Engine7)
+ * #### complete
     The startup method of Engine7.
     
 ### Events
