@@ -149,15 +149,14 @@ window.Engine7 = (function() {
                 req.params = $(element).attr(ATTR_PARAMS);
                 req.dom = $(element);
 
-                if(engine.events.beforeInvoke["*"] || engine.events.beforeInvoke[req.id]){
-                    req.onBeforeInvoke = engine.events.beforeInvoke;
-                }
-                if(engine.events.afterInvoke["*"] || engine.events.afterInvoke[req.id]){
-                    req.onAfterInvoke = engine.events.afterInvoke;
-                }
-                if(engine.events.invokeError["*"] || engine.events.invokeError[req.id]){
-                    req.onInvokeError = engine.events.invokeError;
-                }
+                var identify = engine.events.beforeInvoke["*"] ? "*" : req.id;
+                req.onBeforeInvoke = engine.events.beforeInvoke[identify];
+
+                identify = engine.events.afterInvoke["*"] ? "*" : req.id;
+                req.onAfterInvoke = engine.events.afterInvoke[identify];
+
+                identify = engine.events.invokeError["*"] ? "*" : req.id;
+                req.onInvokeError = engine.events.invokeError[identify];
 
             };
             this.init();
@@ -207,12 +206,11 @@ window.Engine7 = (function() {
                     throw new Error("ID is required on template.");
                 }
 
-                if(engine.events.beforeRender["*"] || engine.events.beforeRender[tpl.id]){
-                    tpl.onBeforeRender = engine.events.beforeRender;
-                }
-                if(engine.events.afterRender["*"] || engine.events.afterRender[tpl.id]){
-                    tpl.onAfterRender = engine.events.afterRender;
-                }
+                var identify = engine.events.beforeRender["*"] ? "*" : tpl.id;
+                tpl.onBeforeRender = engine.events.beforeRender[identify];
+
+                identify = engine.events.afterRender["*"] ? "*" : tpl.id;
+                tpl.onAfterRender = engine.events.afterRender[identify];
             };
             this.init();
         }
@@ -222,6 +220,7 @@ window.Engine7 = (function() {
             var INPUT_TYPE = ["text","hidden","password","checkbox","radio"];
 
             this.id = null;
+            this.el = null;
             this.action = null;
             this.method = "GET";
             this.elements = [];
@@ -301,6 +300,7 @@ window.Engine7 = (function() {
             this.init = function () {
                 form.id = $(element).attr("id");
                 form.action = $(element).attr("action");
+                form.el = element;
 
                 if(isNull(form.id)){
                     form.id = "form-" + randomString();
@@ -329,15 +329,14 @@ window.Engine7 = (function() {
                     return false;
                 });
 
-                if(engine.events.beforeSubmit["*"] || engine.events.beforeSubmit[form.id]){
-                    form.onBeforeSubmit = engine.events.beforeSubmit;
-                }
-                if(engine.events.submitBack["*"] || engine.events.submitBack[form.id]){
-                    form.onSubmitBack = engine.events.submitBack;
-                }
-                if(engine.events.submitError["*"] || engine.events.submitError[form.id]){
-                    form.onSubmitError = engine.events.submitError;
-                }
+                var identify = engine.events.beforeSubmit["*"] ? "*" : form.id;
+                form.onBeforeSubmit = engine.events.beforeSubmit[identify];
+
+                identify = engine.events.submitBack["*"] ? "*" : form.id;
+                form.onSubmitBack = engine.events.submitBack[identify];
+
+                identify = engine.events.submitError["*"] ? "*" : form.id;
+                form.onSubmitError = engine.events.submitError[identify];
             };
             this.init();
         }
