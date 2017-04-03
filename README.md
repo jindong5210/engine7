@@ -26,9 +26,10 @@ JavaScript template engine based on Template7 with syntax similar to Handlebars.
 <head>
 <script type="text/javascript" src="/bower_components/jquery/dist/jquery.min.js"></script>
 <script type="text/javascript" src="/bower_components/Template7/dist/template7.min.js"></script>
+<script type="text/javascript" src="/src/engine7.js"></script>
 </head>
 <body>
-<script type="text/javascript" src="/src/engine7.js"></script>
+...
 </body>
 </html>
 ```
@@ -37,9 +38,7 @@ JavaScript template engine based on Template7 with syntax similar to Handlebars.
 ```
 <script type="text/template7" id="tmpl-skills">
     <table border="1">
-        <tr>
-            <th>ID</th><th>Name</th>
-        </tr>
+        <tr><th>ID</th><th>Name</th></tr>
         {{#each this}}
         <tr>
             <td>{{this.id}}</td><td>{{this.name}}</td>
@@ -85,7 +84,7 @@ JavaScript template engine based on Template7 with syntax similar to Handlebars.
 <div data-tpl-id="tmpl-user" data-api-url="data/user.json"></div>
 <script type="text/javascript">
 Engine7.complete(function(){
-	...
+	... // Your code here.
 });
 </script>
 ```
@@ -114,7 +113,7 @@ Engine7.complete(function(){
     ```
 
 * #### data-api-method  
-    Define a JSON API METHOD. (POST/GET)
+    Define a JSON API METHOD. Default is GET. (POST/GET)
     
     ```
      <div data-tpl-id="tmpl-user-all" data-api-url="data/test.json" data-api-method="POST"></div>
@@ -153,42 +152,57 @@ Engine7.complete(function(){
         }
     }
     ```
+    
+### Properties
+
+ * ### templates
+    All instance of Engine7 template.
+    
+ * ### requests
+    All instance of Engine7 request.
+    
+ * ### forms
+    All instance of Engine7 form.
 
 ### Methods
 
- * #### complete
+ * #### complete (Engine7)
     The startup method of Engine7.
-    ```
-    Engine7.complete(function(){
-    	...
-    });
-    ```
     
- * #### onBeforeRender
+### Events
+   Events should be defined before Engine7 complete.
+
+ * #### onBeforeRender (TemplateId , Callback)
     Before render a template.
+    ```
+    Engine7.onBeforeRender("templateId", function(){
+        ...
+    })
+    Engine7.complete();
+    ```
     
- * #### onAfterRender
+ * #### onAfterRender (TemplateId , Callback)
     After render a template.
     
- * #### onBeforeInvoke
+ * #### onBeforeInvoke (TemplateId , Callback)
     Before invoke a API.
     
- * #### onAfterInvoke
+ * #### onAfterInvoke (RequestId , Callback)
     After invoke a API.
  
- * #### onInvokeError
+ * #### onInvokeError (RequestId , Callback)
     Invoke API error.
     
- * #### onBeforeSubmit
+ * #### onBeforeSubmit (FormId , Callback)
     Before form submit.
     
- * #### onSubmitBack
+ * #### onSubmitBack (FormId , Callback)
     After form submit.
  
- * #### onSubmitError
+ * #### onSubmitError (FormId , Callback)
     Submit error.
  
-### Variables
+### Variables in Template
 
 * #### $context
 

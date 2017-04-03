@@ -49,6 +49,16 @@ window.Engine7 = (function() {
         this.forms = {};
         this.tasks = 0;
         this.completeCB = null;
+        this.events = {
+            beforeInvoke : {},
+            afterInvoke : {},
+            beforeRender : {},
+            afterRender : {},
+            invokeError : {},
+            beforeSubmit : {},
+            submitBack : {},
+            submitError : {}
+        };
 
         function Request(element){
             var req = this;
@@ -139,6 +149,16 @@ window.Engine7 = (function() {
                 req.params = $(element).attr(ATTR_PARAMS);
                 req.dom = $(element);
 
+                if(engine.events.beforeInvoke["*"] || engine.events.beforeInvoke[req.id]){
+                    req.onBeforeInvoke = engine.events.beforeInvoke;
+                }
+                if(engine.events.afterInvoke["*"] || engine.events.afterInvoke[req.id]){
+                    req.onAfterInvoke = engine.events.afterInvoke;
+                }
+                if(engine.events.invokeError["*"] || engine.events.invokeError[req.id]){
+                    req.onInvokeError = engine.events.invokeError;
+                }
+
             };
             this.init();
         }
@@ -149,7 +169,7 @@ window.Engine7 = (function() {
             this.id = null;
             this.src = null;
             this.onBeforeRender = null;
-            this.onAfterRender = null
+            this.onAfterRender = null;
 
             this.render = function (context, dom) {
 
@@ -186,6 +206,13 @@ window.Engine7 = (function() {
                 if(isNull(tpl.id)){
                     throw new Error("ID is required on template.");
                 }
+
+                if(engine.events.beforeRender["*"] || engine.events.beforeRender[tpl.id]){
+                    req.onBeforeRender = engine.events.beforeRender;
+                }
+                if(engine.events.afterRender["*"] || engine.events.afterRender[tpl.id]){
+                    req.onAfterRender = engine.events.afterRender;
+                }
             };
             this.init();
         }
@@ -200,11 +227,10 @@ window.Engine7 = (function() {
             this.elements = [];
             this.onBeforeSubmit = null;
             this.onSubmitBack = null;
-            this.onSubmitError = null
+            this.onSubmitError = null;
 
             this.putElJSON = function (json, name, value) {
                 var arr = name.split(/\./);
-                var obj = {};
                 while(arr.length > 1){
                     var node = arr.shift();
                     if(!json[node]){
@@ -302,6 +328,16 @@ window.Engine7 = (function() {
                     form.submit();
                     return false;
                 });
+
+                if(engine.events.beforeSubmit["*"] || engine.events.beforeSubmit[form.id]){
+                    req.onBeforeSubmit = engine.events.beforeSubmit;
+                }
+                if(engine.events.submitBack["*"] || engine.events.submitBack[form.id]){
+                    req.onSubmitBack = engine.events.submitBack;
+                }
+                if(engine.events.submitError["*"] || engine.events.submitError[form.id]){
+                    req.onSubmitError = engine.events.submitError;
+                }
             };
             this.init();
         }
@@ -329,8 +365,40 @@ window.Engine7 = (function() {
             engine._invokeAll();
         };
 
+        this.onBeforeRender = function(tplId, cb){
+            engine.events.beforeRender[tplId] = cb;
+        };
+
+        this.onAfterRender = function(tplId, cb){
+            engine.events.afterRender[tplId] = cb;
+        };
+
+        this.onBeforeInvoke = function(reqId, cb){
+            engine.events.beforeInvoke[reqId] = cb;
+        };
+
+        this.onAfterInvoke = function(reqId, cb){
+            engine.events.afterInvoke[reqId] = cb;
+        };
+
+        this.onInvokeError = function(reqId, cb){
+            engine.events.invokeError[reqId] = cb;
+        };
+
+        this.onBeforeSubmit = function (formId, cb) {
+            engine.events.beforeSubmit[formId] = cb;
+        };
+
+        this.onSubmitBack = function (formId, cb) {
+            engine.events.submitBack[formId] = cb;
+        };
+
+        this.onSubmitError = function (formId, cb) {
+            engine.events.submitError[formId] = cb;
+        };
+
         this._init = function(){
-            $("script[type='" + ATTR_TEMPLATE7 + "']").each(function(i) {
+            $("script[type='" + ATTR_TEMPLATE7 + "']").each(function() {
                 var template = new Template(this);
                 engine.templates[template.id] = template;
             });
@@ -347,8 +415,6 @@ window.Engine7 = (function() {
                 engine.forms[form.id] = form;
             });
         };
-
-
 
     }
 
