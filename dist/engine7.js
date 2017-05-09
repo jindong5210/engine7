@@ -8,7 +8,7 @@
  * 
  * Licensed under MIT
  * 
- * Released on: April 4, 2017
+ * Released on: May 9, 2017
  */
 window.Engine7 = (function() {
     'use strict';
@@ -34,14 +34,14 @@ window.Engine7 = (function() {
     }
 
     function randomString(len) {
-      len = len || 8;
-      var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-      var maxPos = chars.length;
-      var pwd = '';
-      for (var i = 0; i < len; i++) {
-        pwd += chars.charAt(Math.floor(Math.random() * maxPos));
-      }
-      return pwd;
+        len = len || 8;
+        var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        var maxPos = chars.length;
+        var pwd = '';
+        for (var i = 0; i < len; i++) {
+            pwd += chars.charAt(Math.floor(Math.random() * maxPos));
+        }
+        return pwd;
     }
 
     function Engine7(){
@@ -132,7 +132,7 @@ window.Engine7 = (function() {
                 };
 
                 if(!isNull(req.onBeforeInvoke)){
-                  req.onBeforeInvoke(options, req);
+                    req.onBeforeInvoke(options, req);
                 }
 
                 $.ajax(options).done(function(){
@@ -187,7 +187,7 @@ window.Engine7 = (function() {
                 var srcTemplate = Template7.compile(tpl.src);
 
                 if(!isNull(tpl.onBeforeRender)){
-                  tpl.onBeforeRender(context,tpl);
+                    tpl.onBeforeRender(context,tpl);
                 }
 
                 var html = srcTemplate(context);
@@ -195,7 +195,7 @@ window.Engine7 = (function() {
                 dom.append(els);
 
                 if(!isNull(tpl.onAfterRender)){
-                  tpl.onAfterRender(els,tpl);
+                    tpl.onAfterRender(els,tpl);
                 }
 
                 var reqdoms = els.filter("[" + ATTR_URL + "]");
@@ -229,13 +229,12 @@ window.Engine7 = (function() {
 
         function Form(element) {
             var form = this;
-            var INPUT_TYPE = ["text","hidden","password","checkbox","radio"];
+            var INPUT_TYPE = ["text","email","number","hidden","password","checkbox","radio"];
 
             this.id = null;
             this.el = null;
             this.action = null;
             this.method = "GET";
-            this.elements = [];
             this.onBeforeSubmit = null;
             this.onSubmitBack = null;
             this.onSubmitError = null;
@@ -250,8 +249,11 @@ window.Engine7 = (function() {
                     json = json[node];
                 }
                 var last = arr[arr.length - 1];
-                if(json[last]){
-                    var tmp = [json[last]];
+                if(json[last] !== undefined){
+                    var tmp = json[last];
+                    if(!Array.isArray(json[last])){
+                        tmp = [json[last]];
+                    }
                     tmp.push(value);
                     json[last] = tmp;
                 }else{
@@ -261,29 +263,35 @@ window.Engine7 = (function() {
 
             this.toJSON = function () {
                 var json = {};
-                    for(var i=0; i<form.elements.length; i++){
-                    var el = form.elements[i];
-                    var tag = el.tagName;
-                    var type = $(el).attr("type");
-                    var name = $(el).attr("name");
-                    var val = $(el).val();
+
+                $(element).find("input,textarea,select").each(function () {
+                    var tag = this.tagName;
+                    var type = $(this).attr("type");
+                    var name = $(this).attr("name");
+                    var val = $(this).val();
+                    if(!name){
+                        return true;
+                    }
+                    if(tag === "INPUT" && (type === "button" || type === "submit") || type === "reset"){
+                        return true;
+                    }
                     if(tag === "INPUT" && (type === "checkbox" || type === "radio")){
-                        if(!$(el).is(':checked')) {
-                            continue;
+                        if(!$(this).is(':checked')) {
+                            return true;
                         }
                     }
                     form.putElJSON(json, name, val);
-                }
+                })
                 return json;
             };
             this.handleSuccess = function(data, status){
                 if(!isNull(form.onSubmitBack)){
-                  form.onSubmitBack(data, status, form);
+                    form.onSubmitBack(data, status, form);
                 }
             };
             this.handleError = function (xhr, status, error) {
                 if(!isNull(form.onSubmitError)){
-                  form.onSubmitError(xhr, status, error, form);
+                    form.onSubmitError(xhr, status, error, form);
                 }else{
                     console.error(error);
                     throw new Error("Error occurs when submit form [" + form.id + "]");
@@ -293,7 +301,7 @@ window.Engine7 = (function() {
             this.submit = function () {
                 var json = form.toJSON();
                 if(!isNull(form.onBeforeSubmit)){
-                  form.onBeforeSubmit(json, form);
+                    form.onBeforeSubmit(json, form);
                 }
 
                 var options = {
@@ -305,8 +313,8 @@ window.Engine7 = (function() {
                     error : form.handleError
                 };
 
-                $.ajax(options).done(function(){
-                    $(element).find("input[type='submit']").removeAttr("disabled");
+                $.ajax(options).always(function(){
+                    $(element).find("[type='submit']").removeAttr("disabled");
                 });
             };
             this.init = function () {
@@ -324,30 +332,19 @@ window.Engine7 = (function() {
                 if(!isNull(method)){
                     form.method = method;
                 }
-                $(element).find("input,textarea,select").each(function () {
-                    var name = $(this).attr("name");
-                    var type = $(this).attr("type");
-                    var tag = this.tagName;
-                    if(!isNull(name)){
-                        if(tag === "INPUT" && getArrayIndex(INPUT_TYPE, type) < 0){//Not supported
-                            return true;
-                        }
-                        form.elements.push(this);
-                    }
-                });
                 $(element).submit(function () {
-                    $(element).find("input[type='submit']").attr("disabled","disabled");
+                    $(element).find("[type='submit']").attr("disabled","disabled");
                     form.submit();
                     return false;
                 });
 
-                var identify = engine.events.beforeSubmit["*"] ? "*" : form.id;
+                var identify = engine.events.beforeSubmit[form.id] ? form.id : "*";
                 form.onBeforeSubmit = engine.events.beforeSubmit[identify];
 
-                identify = engine.events.submitBack["*"] ? "*" : form.id;
+                identify = engine.events.submitBack[form.id] ? form.id : "*";
                 form.onSubmitBack = engine.events.submitBack[identify];
 
-                identify = engine.events.submitError["*"] ? "*" : form.id;
+                identify = engine.events.submitError[form.id] ? form.id : "*";
                 form.onSubmitError = engine.events.submitError[identify];
             };
             this.init();
@@ -356,9 +353,9 @@ window.Engine7 = (function() {
         this._invokeAll = function(){
             var count = 0;
             for(var key in engine.requests){
-              var req = engine.requests[key];
-              req.invoke();
-              count ++;
+                var req = engine.requests[key];
+                req.invoke();
+                count ++;
             }
             if(count === 0){
                 engine.completeCB();
